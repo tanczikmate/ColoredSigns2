@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 public final class ColoredSigns2 extends JavaPlugin {
 
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
+    public static final String PERMISSION = "coloredsigns2.use";
 
     @Override
     public void onEnable() {
@@ -30,7 +31,9 @@ public final class ColoredSigns2 extends JavaPlugin {
         getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             final Commands commands = event.registrar();
 
+            // A fő parancsfa, kiegészítve a .requires() ellenőrzéssel a gyökérszinten
             var commandNode = Commands.literal("tabla")
+                    .requires(source -> source.getSender().hasPermission(PERMISSION))
                     .then(Commands.literal("1").then(Commands.argument("szöveg", StringArgumentType.greedyString())
                             .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 1))
                             .executes(ctx -> runCommand(ctx, "1"))))
@@ -50,8 +53,10 @@ public final class ColoredSigns2 extends JavaPlugin {
 
             commands.register(commandNode, "Tábla szerkesztése");
 
+            // Az ékezetes álnév fája, szintén levédve a .requires() ellenőrzéssel a redirect előtt
             commands.register(
                     Commands.literal("tábla")
+                            .requires(source -> source.getSender().hasPermission(PERMISSION))
                             .redirect(commandNode)
                             .build(),
                     "Tábla szerkesztése"

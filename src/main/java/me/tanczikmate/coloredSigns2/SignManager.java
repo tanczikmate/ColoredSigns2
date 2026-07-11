@@ -9,13 +9,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 
+import static me.tanczikmate.coloredSigns2.ColoredSigns2.PERMISSION;
+
 public class SignManager implements Listener {
 
     @EventHandler
     public void onSignChange(SignChangeEvent event) {
         Player player = event.getPlayer();
 
-        if (!player.hasPermission("coloredsigns2.use")) return;
+        if (!player.hasPermission(PERMISSION)) return;
 
         if (!(event.getBlock().getState() instanceof Sign oldSign)) return;
         Side side = event.getSide();

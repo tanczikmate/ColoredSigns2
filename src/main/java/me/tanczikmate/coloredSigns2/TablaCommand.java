@@ -53,9 +53,4 @@ public class TablaCommand implements BasicCommand {
                 .build()
         );
     }
-
-    @Override
-    public @Nullable String permission() {
-        return "coloredsigns2.use";
-    }
 }
