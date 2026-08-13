@@ -31,44 +31,35 @@ public final class ColoredSigns2 extends JavaPlugin {
         getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             final Commands commands = event.registrar();
 
-            // A fő parancsfa, kiegészítve a .requires() ellenőrzéssel a gyökérszinten
-            var commandNode = Commands.literal("tabla")
+            // Main command tree with the root-level .requires() check
+            var commandNode = Commands.literal("editsign")
                     .requires(source -> source.getSender().hasPermission(PERMISSION))
-                    .then(Commands.literal("1").then(Commands.argument("szöveg", StringArgumentType.greedyString())
+                    .then(Commands.literal("1").then(Commands.argument("text", StringArgumentType.greedyString())
                             .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 1))
                             .executes(ctx -> runCommand(ctx, "1"))))
 
-                    .then(Commands.literal("2").then(Commands.argument("szöveg", StringArgumentType.greedyString())
+                    .then(Commands.literal("2").then(Commands.argument("text", StringArgumentType.greedyString())
                             .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 2))
                             .executes(ctx -> runCommand(ctx, "2"))))
 
-                    .then(Commands.literal("3").then(Commands.argument("szöveg", StringArgumentType.greedyString())
+                    .then(Commands.literal("3").then(Commands.argument("text", StringArgumentType.greedyString())
                             .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 3))
                             .executes(ctx -> runCommand(ctx, "3"))))
 
-                    .then(Commands.literal("4").then(Commands.argument("szöveg", StringArgumentType.greedyString())
+                    .then(Commands.literal("4").then(Commands.argument("text", StringArgumentType.greedyString())
                             .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 4))
                             .executes(ctx -> runCommand(ctx, "4"))))
                     .build();
 
-            commands.register(commandNode, "Tábla szerkesztése");
-
-            // Az ékezetes álnév fája, szintén levédve a .requires() ellenőrzéssel a redirect előtt
-            commands.register(
-                    Commands.literal("tábla")
-                            .requires(source -> source.getSender().hasPermission(PERMISSION))
-                            .redirect(commandNode)
-                            .build(),
-                    "Tábla szerkesztése"
-            );
+            commands.register(commandNode, "Edit a sign");
         });
 
-        getLogger().info("A ColoredSigns2 plugin sikeresen betöltődött!");
+        getLogger().info("ColoredSigns2 plugin loaded successfully!");
     }
 
     private int runCommand(CommandContext<CommandSourceStack> ctx, String sor) {
-        String szoveg = ctx.getArgument("szöveg", String.class);
-        new TablaCommand().execute(ctx.getSource(), new String[]{sor, szoveg});
+        String text = ctx.getArgument("text", String.class);
+        new SigneditCommand().execute(ctx.getSource(), new String[]{sor, text});
         return 1;
     }
 

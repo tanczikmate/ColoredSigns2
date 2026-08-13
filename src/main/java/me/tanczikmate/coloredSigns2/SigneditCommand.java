@@ -10,9 +10,8 @@ import org.bukkit.block.sign.Side;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
-public class TablaCommand implements BasicCommand {
+public class SigneditCommand implements BasicCommand {
 
     @Override
     public void execute(CommandSourceStack source, String @NonNull [] args) {
@@ -20,14 +19,14 @@ public class TablaCommand implements BasicCommand {
 
         if (!(source.getExecutor() instanceof Player player)) {
             sender.sendMessage(Component.text(
-                    "Ezt a parancsot csak játékosok használhatják!", NamedTextColor.RED));
+                    "Only players can use this command!", NamedTextColor.RED));
             return;
         }
 
         Block block = player.getTargetBlockExact(4);
         if (block == null || !(block.getState() instanceof Sign sign)) {
             player.sendMessage(Component.text(
-                    "A parancs használhatához rá kell nézned egy táblára.", NamedTextColor.RED));
+                    "You must be looking at a sign to use this command.", NamedTextColor.RED));
             return;
         }
 
@@ -46,9 +45,9 @@ public class TablaCommand implements BasicCommand {
         sign.update();
 
         player.sendMessage(Component.text()
-                .append(Component.text("A tábla ", NamedTextColor.GREEN))
-                .append(Component.text(signLine + ".", NamedTextColor.WHITE))
-                .append(Component.text(" sora beállítva a következőre: ", NamedTextColor.GREEN))
+                .append(Component.text("Set line ", NamedTextColor.GREEN))
+                .append(Component.text(signLine, NamedTextColor.WHITE))
+                .append(Component.text(" to: ", NamedTextColor.GREEN))
                 .append(formattedText)
                 .build()
         );
