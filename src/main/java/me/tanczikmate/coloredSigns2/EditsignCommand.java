@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
-public class SigneditCommand implements BasicCommand {
+public class EditsignCommand implements BasicCommand {
 
     @Override
     public void execute(CommandSourceStack source, String @NonNull [] args) {
@@ -30,13 +30,30 @@ public class SigneditCommand implements BasicCommand {
             return;
         }
 
+        if (args.length == 0) {
+            return;
+        }
+
         int signLine = Integer.parseInt(args[0]);
-        String fullText = args[1];
+        String fullText = args.length > 1 ? args[1] : "";
 
         Side lookingAtSide = sign.getInteractableSideFor(player.getLocation());
         Side side = Side.FRONT;
         if (lookingAtSide == Side.BACK) {
             side = Side.BACK;
+        }
+
+        if (fullText.isEmpty()) {
+            sign.getSide(side).line(signLine - 1, Component.empty());
+            sign.update();
+
+            player.sendMessage(Component.text()
+                    .append(Component.text("Cleared line ", NamedTextColor.GREEN))
+                    .append(Component.text(signLine, NamedTextColor.WHITE))
+                    .append(Component.text(".", NamedTextColor.GREEN))
+                    .build()
+            );
+            return;
         }
 
         Component formattedText = ColoredSigns2.formatHexAndLegacy(fullText);

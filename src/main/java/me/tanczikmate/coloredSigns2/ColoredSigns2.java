@@ -34,21 +34,29 @@ public final class ColoredSigns2 extends JavaPlugin {
             // Main command tree with the root-level .requires() check
             var commandNode = Commands.literal("editsign")
                     .requires(source -> source.getSender().hasPermission(PERMISSION))
-                    .then(Commands.literal("1").then(Commands.argument("text", StringArgumentType.greedyString())
-                            .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 1))
-                            .executes(ctx -> runCommand(ctx, "1"))))
+                    .then(Commands.literal("1")
+                            .executes(ctx -> runCommand(ctx, "1", ""))
+                            .then(Commands.argument("text", StringArgumentType.greedyString())
+                                    .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 1))
+                                    .executes(ctx -> runCommand(ctx, "1", ctx.getArgument("text", String.class)))))
 
-                    .then(Commands.literal("2").then(Commands.argument("text", StringArgumentType.greedyString())
-                            .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 2))
-                            .executes(ctx -> runCommand(ctx, "2"))))
+                    .then(Commands.literal("2")
+                            .executes(ctx -> runCommand(ctx, "2", ""))
+                            .then(Commands.argument("text", StringArgumentType.greedyString())
+                                    .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 2))
+                                    .executes(ctx -> runCommand(ctx, "2", ctx.getArgument("text", String.class)))))
 
-                    .then(Commands.literal("3").then(Commands.argument("text", StringArgumentType.greedyString())
-                            .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 3))
-                            .executes(ctx -> runCommand(ctx, "3"))))
+                    .then(Commands.literal("3")
+                            .executes(ctx -> runCommand(ctx, "3", ""))
+                            .then(Commands.argument("text", StringArgumentType.greedyString())
+                                    .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 3))
+                                    .executes(ctx -> runCommand(ctx, "3", ctx.getArgument("text", String.class)))))
 
-                    .then(Commands.literal("4").then(Commands.argument("text", StringArgumentType.greedyString())
-                            .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 4))
-                            .executes(ctx -> runCommand(ctx, "4"))))
+                    .then(Commands.literal("4")
+                            .executes(ctx -> runCommand(ctx, "4", ""))
+                            .then(Commands.argument("text", StringArgumentType.greedyString())
+                                    .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 4))
+                                    .executes(ctx -> runCommand(ctx, "4", ctx.getArgument("text", String.class)))))
                     .build();
 
             commands.register(commandNode, "Edit a sign");
@@ -57,9 +65,8 @@ public final class ColoredSigns2 extends JavaPlugin {
         getLogger().info("ColoredSigns2 plugin loaded successfully!");
     }
 
-    private int runCommand(CommandContext<CommandSourceStack> ctx, String sor) {
-        String text = ctx.getArgument("text", String.class);
-        new SigneditCommand().execute(ctx.getSource(), new String[]{sor, text});
+    private int runCommand(CommandContext<CommandSourceStack> ctx, String sor, String text) {
+        new EditsignCommand().execute(ctx.getSource(), new String[]{sor, text});
         return 1;
     }
 
