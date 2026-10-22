@@ -1,0 +1,37 @@
+# ========================================================
+#            ColoredSigns2 Configuration File
+# ========================================================
+
+settings:
+  # Maximum distance (in blocks) to target and edit a sign.
+  max-distance: 4.5
+
+  # Automatically preserve existing colors when editing signs via the vanilla GUI.
+  preserve-vanilla-gui-colors: true
+
+  # Provide tab-completion suggestions containing the sign's current text.
+  enable-tab-suggestions: true
+
+formatting:
+  # Allow obfuscated / magic text (&k). Many servers prefer to disable this.
+  allow-magic-codes: false
+
+# All messages support MiniMessage formatting (<red>, <green>, <#rrggbb>, <bold>, etc.)
+messages:
+  prefix: "<gold>[ColoredSigns]</gold> "
+
+  only-players: "<red>Only players can use this command!</red>"
+  must-look-at-sign: "<red>You must be looking at a sign to use this command.</red>"
+  invalid-line: "<red>Line number must be between 1 and 4.</red>"
+  waxed-sign: "<red>This sign is waxed and cannot be edited.</red>"
+  no-permission: "<red>You do not have permission to edit this sign.</red>"
+
+  # Available placeholders: <line>
+  line-cleared: "<green>Cleared line <white><line></white>.</green>"
+
+  # Available placeholders: <line>, <text>
+  line-set: "<green>Set line <white><line></white> to: </green><text>"
+
+  usage: "<yellow>Usage: /editsign <1-4> [text]</yellow>"
+  reload-success: "<green>Configuration reloaded successfully!</green>"
+  no-permission-command: "<red>You don't have permission to use this command.</red>"

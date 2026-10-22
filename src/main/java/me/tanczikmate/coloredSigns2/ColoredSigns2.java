@@ -15,6 +15,7 @@ import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,59 +24,90 @@ public final class ColoredSigns2 extends JavaPlugin {
 
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
     public static final String PERMISSION = "coloredsigns2.use";
+    public static final String RELOAD_PERMISSION = "coloredsigns2.reload";
+
+    private static ColoredSigns2 instance;
+    private ConfigManager configManager;
+    private EditsignCommand editsignCommand;
+
+    public static ColoredSigns2 getInstance() {
+        return instance;
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
 
     @Override
     public void onEnable() {
-        getServer().getPluginManager().registerEvents(new SignManager(), this);
+        instance = this;
+
+        saveDefaultConfig();
+        this.configManager = new ConfigManager(this);
+        this.editsignCommand = new EditsignCommand(this);
+
+        getServer().getPluginManager().registerEvents(new SignManager(this), this);
 
         getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> {
             final Commands commands = event.registrar();
 
-            // Main command tree with the root-level .requires() check
-            var commandNode = Commands.literal("editsign")
+            var editsignNode = Commands.literal("editsign")
                     .requires(source -> source.getSender().hasPermission(PERMISSION))
-                    .then(Commands.literal("1")
-                            .executes(ctx -> runCommand(ctx, "1", ""))
-                            .then(Commands.argument("text", StringArgumentType.greedyString())
-                                    .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 1))
-                                    .executes(ctx -> runCommand(ctx, "1", ctx.getArgument("text", String.class)))))
+                    .executes(ctx -> {
+                        configManager.sendMessage(ctx.getSource().getSender(), "usage");
+                        return 1;
+                    });
 
-                    .then(Commands.literal("2")
-                            .executes(ctx -> runCommand(ctx, "2", ""))
-                            .then(Commands.argument("text", StringArgumentType.greedyString())
-                                    .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 2))
-                                    .executes(ctx -> runCommand(ctx, "2", ctx.getArgument("text", String.class)))))
+            for (int i = 1; i <= 4; i++) {
+                final String lineNumStr = String.valueOf(i);
+                final int lineNum = i;
 
-                    .then(Commands.literal("3")
-                            .executes(ctx -> runCommand(ctx, "3", ""))
-                            .then(Commands.argument("text", StringArgumentType.greedyString())
-                                    .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 3))
-                                    .executes(ctx -> runCommand(ctx, "3", ctx.getArgument("text", String.class)))))
+                editsignNode.then(Commands.literal(lineNumStr)
+                        .executes(ctx -> runCommand(ctx, lineNumStr, ""))
+                        .then(Commands.argument("text", StringArgumentType.greedyString())
+                                .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, lineNum))
+                                .executes(ctx -> runCommand(ctx, lineNumStr, ctx.getArgument("text", String.class)))));
+            }
 
-                    .then(Commands.literal("4")
-                            .executes(ctx -> runCommand(ctx, "4", ""))
-                            .then(Commands.argument("text", StringArgumentType.greedyString())
-                                    .suggests((ctx, builder) -> getSignLineSuggestion(ctx, builder, 4))
-                                    .executes(ctx -> runCommand(ctx, "4", ctx.getArgument("text", String.class)))))
+            commands.register(editsignNode.build(), "Edit a sign", List.of("signedit", "se"));
+
+            // Admin command: /coloredsigns reload
+            var csNode = Commands.literal("coloredsigns")
+                    .requires(source -> source.getSender().hasPermission(RELOAD_PERMISSION))
+                    .executes(ctx -> {
+                        configManager.sendMessage(ctx.getSource().getSender(), "usage");
+                        return 1;
+                    })
+                    .then(Commands.literal("reload")
+                            .executes(ctx -> {
+                                configManager.loadConfig();
+                                configManager.sendMessage(ctx.getSource().getSender(), "reload-success");
+                                return 1;
+                            }))
                     .build();
 
-            commands.register(commandNode, "Edit a sign");
+            commands.register(csNode, "ColoredSigns admin commands");
         });
 
         getLogger().info("ColoredSigns2 plugin loaded successfully!");
     }
 
-    private int runCommand(CommandContext<CommandSourceStack> ctx, String sor, String text) {
-        new EditsignCommand().execute(ctx.getSource(), new String[]{sor, text});
+    private int runCommand(CommandContext<CommandSourceStack> ctx, String line, String text) {
+        editsignCommand.execute(ctx.getSource(), new String[]{line, text});
         return 1;
     }
 
     private CompletableFuture<Suggestions> getSignLineSuggestion(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder, int lineNum) {
+        if (!configManager.isEnableTabSuggestions()) {
+            return builder.buildFuture();
+        }
+
         if (!(ctx.getSource().getExecutor() instanceof Player player)) {
             return builder.buildFuture();
         }
 
-        Block block = player.getTargetBlockExact(4);
+        int maxDist = (int) Math.ceil(configManager.getMaxDistance());
+        Block block = player.getTargetBlockExact(maxDist);
         if (block != null && block.getState() instanceof Sign sign) {
             Side lookingAtSide = sign.getInteractableSideFor(player.getLocation());
             Side side = (lookingAtSide == Side.BACK) ? Side.BACK : Side.FRONT;
@@ -94,6 +126,10 @@ public final class ColoredSigns2 extends JavaPlugin {
 
     public static Component formatHexAndLegacy(String text) {
         if (text == null) return Component.empty();
+
+        if (instance != null && !instance.getConfigManager().isAllowMagicCodes()) {
+            text = text.replaceAll("(?i)&k", "");
+        }
 
         Matcher matcher = HEX_PATTERN.matcher(text);
         StringBuilder sb = new StringBuilder();

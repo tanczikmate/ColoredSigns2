@@ -2,7 +2,7 @@ name: ColoredSigns2
 version: '${version}'
 
 main: me.tanczikmate.coloredSigns2.ColoredSigns2
-api-version: '1.21.11'
+api-version: '1.21'
 load: POSTWORLD
 
 description: A lightweight, modern Paper plugin for colorizing and effortlessly editing signs with Hex & legacy color support.
@@ -10,3 +10,14 @@ website: https://modrinth.com/plugin/coloredsigns2
 folia-supported: true
 
 authors: [ tanczikmate ]
+
+permissions:
+  coloredsigns2.use:
+    description: Allows using color codes on signs and using /editsign
+    default: op
+  coloredsigns2.bypass.waxed:
+    description: Allows editing waxed signs with /editsign
+    default: op
+  coloredsigns2.reload:
+    description: Allows reloading the ColoredSigns2 configuration
+    default: op
